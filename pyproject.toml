@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "test-task-djinni"
+version = "0.1.0"
+description = ""
+authors = ["Alexander Solovyov <alexander@solovyov.net>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Django = "^4.1.7"
+Jinja2 = "^3.1.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
