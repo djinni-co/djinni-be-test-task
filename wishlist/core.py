@@ -28,8 +28,8 @@ def macro_t(template_name, macro_name):
     jinja = next(e for e in engines.all()
                  if isinstance(e, backends.jinja2.Jinja2))
     return jinja.env.from_string(
-        '{%% from "%s" import card with context %%}{{ %s(**ctx) }}'
-        % (template_name, macro_name))
+        '{%% from "%(template_name)s" import %(macro_name)s with context %%}{{ %(macro_name)s(**ctx) }}'
+        % {'template_name': template_name, 'macro_name': macro_name})
 
 
 def render_macro(request, template_name, macro_name, **ctx):

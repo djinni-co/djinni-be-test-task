@@ -10,8 +10,7 @@ class Item(models.Model):
         return "https://picsum.photos/seed/%s/600/600" % quote(self.name)
 
 
-class WishItem(models.Model):
-    # unique rather than OneToOne here since we forego authentication, but in a
-    # real world that would be just normal FK
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, unique=True,
-                             related_name='wishlists')
+class WishList(models.Model):
+    name = models.CharField(max_length=255)
+    item = models.ForeignKey(
+        Item, on_delete=models.SET_NULL, related_name='lists', null=True)

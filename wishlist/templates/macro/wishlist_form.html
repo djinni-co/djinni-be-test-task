@@ -1,0 +1,45 @@
+{% macro wishlist_form(wishlists, item_id) %}
+  <div class="wishlist-container">
+    <h6 class="mb-3">Save to wishlist:</h6>
+
+    <form
+      id="wishlist_form-{{item_id}}"
+      method="post"
+      action="/update_wishlists"
+      hx-post="/update_wishlists"
+      hx-target="closest .wishlist-container"
+      hx-swap="outerHTML"
+    >
+      <input type="hidden" name="item_id" value="{{item_id}}">
+      {% for list in wishlists %}
+      <div class="form-check">   
+        <label class="form-check-label">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            value="{{ list.id }}" 
+            name="wishlist_set"
+            {% if list.item_id == item_id|int %} checked {% endif %} >
+          {{ list.name }}
+        </label>
+      </div>
+      {% endfor %}
+    </form>
+    
+    <hr class="dropdown-divider">
+    
+    <form
+      method="post"
+      action="/create_wishlist"
+      hx-post="/create_wishlist"
+      hx-target="closest .wishlist-container"
+      hx-swap="outerHTML"
+    >
+      <input type="hidden" name="item_id" value="{{item_id}}">
+      <div class="input-group mt-3">
+        <input type="text" class="form-control form-control-sm" name="name" placeholder="Wishlist name" />
+        <button class="btn btn-primary">Create</button>
+      </div>
+    </form>
+  </div>
+{% endmacro %}
