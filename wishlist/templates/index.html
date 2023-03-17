@@ -1,22 +1,23 @@
-{% macro wish_category(category, item) %}
-  <li class="category">
-    <div class="checkbox dropdown-item">
-      <label>
-        <form method="post"
-              class="m-0"
-              action="/wishlist/"
-              hx-post="/wishlist/"
-              hx-target="closest .category"
-              hx-swap="outerHTML"
-              hx-trigger="change">
-              {{ csrf_input }}
-              <input type="hidden" name="id" value="{{ item.id }}">
-              <input type="hidden" name="categoryId" value="{{ category.id }}">
-              <input type="checkbox" {% if item.wishlists.filter(category=category).exists() %} checked {% endif %}> {{category.name}}
-          </form>
+{% macro wish_item(wish_item, item_id) %}
+  <form
+    method="put"
+    action="/wishlist/"
+    hx-put="/wishlist/"
+    hx-trigger="change"
+    >
+    <div class="form-check m-3">
+      <label class="form-check-label">
+        <input type="hidden" name="item_id" value="{{item_id}}">
+        <input type="hidden" name="name" value="{{wish_item.name}}">
+        <input 
+          class="form-check-input"
+          type="checkbox"
+          {% if wish_item.item_id|int == item_id|int %} checked {% endif %}
+          >
+        {{ wish_item.name }}
       </label>
     </div>
-  </li>
+  </form>
 {% endmacro -%}
 
 {% macro card(item) %}
@@ -28,47 +29,62 @@
       <h5 class="card-title m-0 p-0">{{ item.name }}</h5>
 
         <div class="btn-group">
-          <form method="post"
-                class="m-0"
-                action="/wishlist/"
-                hx-post="/wishlist/"
-                hx-target="closest .card"
-                hx-swap="outerHTML">
-          {{ csrf_input }}
-          <input type="hidden" name="id" value="{{ item.id }}">
-          <button type="submit" class="btn btn-danger">
-            {% if item.wishlists.filter(category=None).exists() %}
+
+          <button
+            type="button"
+            class="btn btn-danger"
+            hx-put="/wishlist/"
+            hx-vals='{"item_id": {{ item.id }}}'
+            hx-swap="innerHTML"
+            >
+            {% if item.wishlists.filter(name=None).exists() %}
               <i class="bi bi-bookmark-fill"></i>
             {% else %}
               <i class="bi bi-bookmark"></i>
             {% endif %}
              Save
           </button>
-          </form>
-          <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+
+          <button
+            class="btn btn-danger dropdown-toggle dropdown-toggle-split"
+            aria-expanded="false"
+            data-bs-auto-close="outside"
+            data-bs-toggle="dropdown"
+            hx-get="/wishlist/"
+            hx-target=".dropmenu-{{item.id}}"
+            hx-trigger="click"
+            hx-vals='{"item_id": {{ item.id }}}'
+            hx-swap="innerHTML"
+          >
             <span class="visually-hidden">Toggle Dropdown</span>
           </button>
-          <ul class="dropdown-menu" id="dropmenu">
-              {% for category in categories %}
-                  {{ wish_category(category, item) }}
-              {% endfor %}
-            <li><hr class="dropdown-divider"></li>
+
+          <ul class="dropdown-menu" style="width: 20rem">
+            <div class="dropmenu-{{item.id}}">
+              <!-- Here will be rendered wish items after user cliks on dropdown -->
+            </div>
             <li>
-              <form method="post"
-                    class="m-0 dropdown-item"
-                    action="/wishcategory/"
-                    hx-post="/wishcategory/"
-                    hx-target=".dropdown-menu"
-                    hx-swap="afterbegin">
-              {{ csrf_input }}
-              <div class="input-group mb-3">
-                <input type="text" name="name" class="form-control" placeholder="Catalog name" aria-describedby="basic-addon2">
-                <input type="hidden" name="itemId" value="{{ item.id }}">
-                <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="submit">Create</button>
-                </div>
+              <hr class="dropdown-divider">
+            </li>
+
+            <li>
+              <form
+                method="post"
+                action="/wishlist/"
+                hx-post="/wishlist/"
+                hx-target=".dropmenu-{{item.id}}"
+                hx-swap="beforeend"
+              >
+              <div class="input-group mt-3">
+                <input type="hidden" name="item_id" value="{{item.id}}">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  name="name"
+                  placeholder="Wishlist name"/>
+                <button type="submit" id="create-btn" class="btn btn-danger">Add</button>
               </div>
-              </form>
+            </form>
             </li>
           </ul>
         </div>
@@ -86,7 +102,7 @@
     <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon" />
 
   </head>
-  <body class="container">
+  <body class="container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <h1 class="my-5 px-5">Wishlist anybody you want</h1>
 
     <ul class="d-flex flex-wrap justify-content-evenly gap-2">
